@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 import failwhale
 
 # account and search models
@@ -73,6 +74,9 @@ class Status(models.Model):
     
     def is_dm(self):
         return not self.recipient == None
+        
+    def timestamp_est(self):
+        return self.timestamp - datetime.timedelta(0, 60 * 60 * 5) # off five hours
 
 # timeline model
 
