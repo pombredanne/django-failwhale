@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-import failwhale
+from failwhale import util
+from failwhale.models import Summize
     
 class Command(BaseCommand):
     
@@ -10,6 +11,6 @@ class Command(BaseCommand):
     
     def handle(self, name=None, *args, **options):
         
-        summizes = failwhale.models.Summize.objects.all()
+        summizes = Summize.objects.all()
         for summize in summizes:
-            failwhale.import_search_results(summize)
+            util.import_search_results(summize)

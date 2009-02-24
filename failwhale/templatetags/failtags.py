@@ -11,8 +11,8 @@ AT_RE = re.compile(r'@(?P<screen_name>[\w_]+)')
 HASH_RE = re.compile(r'#(?P<tag>[\w_]+)')
 
 @register.simple_tag
-def summize(name):
-    results = Summize.objects.get(name=name).statuses.all()
+def summize(name, count=5):
+    results = Summize.objects.get(name=name).statuses.all()[:count]
     return render_to_string('failwhale/templatetags/summize.html', {"results": results})
 
 @register.filter
