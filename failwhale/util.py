@@ -53,7 +53,7 @@ def import_statuses(accnt):
     
     try:
         last_status = accnt.statuses()[0]
-        since = email.utils.formatdate(time.mktime(last_status.timestamp.timetuple()))
+        since = rfc822.formatdate(time.mktime(last_status.timestamp.timetuple()))
         statuses = client.GetUserTimeline(user=accnt.username, since=since)
     except IndexError:
         statuses = client.GetUserTimeline(user=accnt.username)
