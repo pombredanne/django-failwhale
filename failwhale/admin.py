@@ -19,6 +19,7 @@ class AccountAdmin(admin.ModelAdmin):
     form = AccountAdminForm
     list_display = ['username']
     list_display_links = ['username']
+    search_fields = ['username']
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(Summize, SummizeAdmin)

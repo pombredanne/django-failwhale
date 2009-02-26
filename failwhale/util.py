@@ -3,6 +3,7 @@ from failwhale.models import Account, Status, Summize, Timeline
 import datetime
 import email
 import failwhale
+import time
 import twitter
 import urllib, urllib2
 
@@ -30,6 +31,10 @@ def delete_account(username):
     except Account.DoesNotExist:
         pass
 
+#
+# import methods
+#
+
 def import_profile(accnt, save=True):
     client = twitter.Api(username=accnt.username, password=accnt.password)
     user = client.GetUser(accnt.username)
@@ -41,6 +46,44 @@ def import_profile(accnt, save=True):
     accnt.url = user.url
     if save:
         accnt.save()
+
+def import_statuses(accnt):
+    
+    client = twitter.Api(username=accnt.username, password=accnt.password)
+    
+    try:
+        last_status = accnt.statuses()[0]
+        since = email.utils.formatdate(time.mktime(last_status.timestamp.timetuple()))
+        statuses = client.GetUserTimeline(user=accnt.username, since=since)
+    except IndexError:
+        statuses = client.GetUserTimeline(user=accnt.username)
+        
+    for status in statuses:
+        
+        if not accnt.avatar_url == status.user.profile_image_url:
+            accnt.avatar_url = status.user.profile_image_url
+            accnt.save()
+            
+        time_tuple = email.utils.parsedate(status.created_at)
+        created_at = datetime.datetime(*time_tuple[0:7])
+        
+        try:
+            s = Status.objects.get(pk=status.id)
+        except Status.DoesNotExist:
+            s = Status.objects.create(
+                id=status.id,
+                sender=accnt,
+                message=status.text,
+                timestamp=created_at,
+            )
+        
+        if accnt.related_statuses.filter(timeline__status=s, timeline__discriminator=failwhale.STATUS).count() == 0:
+
+            t = Timeline.objects.create(
+                owner=accnt,
+                status=s,
+                discriminator=failwhale.STATUS,
+            )
 
 def import_search_results(summize, since_id=None):
     
@@ -79,7 +122,7 @@ def import_search_results(summize, since_id=None):
                 timestamp=created_at,
             )
             
-        if summize.statuses.filter(timeline__status=s, timeline__discriminator=failwhale.SEARCH_RESULT).count() == 0:
+        if summize.related_statuses.filter(timeline__status=s, timeline__discriminator=failwhale.SEARCH_RESULT).count() == 0:
         
             t = Timeline.objects.create(
                 owner=summize,

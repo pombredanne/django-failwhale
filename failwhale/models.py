@@ -6,7 +6,7 @@ import failwhale
 
 class Syncable(models.Model):
 
-    statuses = models.ManyToManyField('Status', through='Timeline')
+    related_statuses = models.ManyToManyField('Status', through='Timeline')
 
     last_update = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     next_update = models.DateTimeField(blank=True, null=True)
@@ -40,11 +40,11 @@ class Account(Syncable):
     password = property(_get_password, _set_password)
     
     def statuses(self):
-        return self.tweets.filter(discriminator=failwhale.STATUS)
+        return self.related_statuses.filter(timeline__discriminator=failwhale.STATUS)
     def friend_statuses(self):
-        return self.tweets.filter(discriminator=failwhale.FRIEND_STATUS)
+        return self.related_statuses.filter(timeline__discriminator=failwhale.FRIEND_STATUS)
     def direct_messages(self):
-        return self.tweets.filter(discriminator=failwhale.DIRECT_MESSAGE)
+        return self.related_statuses.filter(timeline__discriminator=failwhale.DIRECT_MESSAGE)
 
 class Summize(Syncable):
     name = models.CharField(max_length=128, blank=True)
@@ -61,7 +61,7 @@ class Summize(Syncable):
 # tweet models
 
 class Status(models.Model):
-    sender = models.ForeignKey(Account, related_name="statuses")
+    sender = models.ForeignKey(Account, related_name="nigh_related_statuses")
     recipient = models.ForeignKey(Account, related_name="received_dms", blank=True, null=True)
     message = models.CharField(max_length=180)
     timestamp = models.DateTimeField()
@@ -89,8 +89,8 @@ TIMELINE_TYPES = (
 
 class Timeline(models.Model):
     discriminator = models.IntegerField(choices=TIMELINE_TYPES)
-    owner = models.ForeignKey(Syncable)
-    status = models.ForeignKey(Status)
+    owner = models.ForeignKey(Syncable, related_name="timeline")
+    status = models.ForeignKey(Status, related_name="timeline")
     
     class Meta:
         unique_together = ('discriminator','owner','status')
