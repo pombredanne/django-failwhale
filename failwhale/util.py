@@ -1,7 +1,7 @@
 from django.utils import simplejson
 from failwhale.models import Account, Status, Summize, Timeline
 import datetime
-import email
+import rfc822
 import failwhale
 import time
 import twitter
@@ -64,7 +64,7 @@ def import_statuses(accnt):
             accnt.avatar_url = status.user.profile_image_url
             accnt.save()
             
-        time_tuple = email.utils.parsedate(status.created_at)
+        time_tuple = rfc822.parsedate(status.created_at)
         created_at = datetime.datetime(*time_tuple[0:7])
         
         try:
@@ -109,7 +109,7 @@ def import_search_results(summize, since_id=None):
             to_user.avatar_url = result['profile_image_url']
             to_user.save()
             
-        time_tuple = email.utils.parsedate(result['created_at'])
+        time_tuple = rfc822.parsedate(result['created_at'])
         created_at = datetime.datetime(*time_tuple[0:7])
         
         try:
