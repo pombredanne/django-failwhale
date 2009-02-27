@@ -26,7 +26,7 @@ def tweetile(text):
         
     def repl_hash(match):
         tag = match.group('tag')
-        return '<a href="http://search.twitter.com/search?q=%s">@%s</a>' % ("%23" + tag, tag)
+        return '<a href="http://search.twitter.com/search?q=%s">#%s</a>' % ("%23" + tag, tag)
     
     def repl_http(match):
         url = match.group('url')
