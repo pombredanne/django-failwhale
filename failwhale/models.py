@@ -61,6 +61,7 @@ class Summize(Syncable):
 # tweet models
 
 class Status(models.Model):
+    id = models.CharField(max_length=255, primary_key=True) 
     sender = models.ForeignKey(Account, related_name="nigh_related_statuses")
     recipient = models.ForeignKey(Account, related_name="received_dms", blank=True, null=True)
     message = models.CharField(max_length=180)
